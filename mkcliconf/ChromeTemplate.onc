@@ -1,0 +1,37 @@
+{
+		 "Type":"UnencryptedConfiguration",
+		      "Certificates": [ {
+		      "GUID": "{$caguid}",
+		      "Type": "Authority",
+		      "X509": "$cacert"
+		   } ],
+		    "NetworkConfigurations": [ {
+		      "GUID": "{$netconfigguid}",
+		      "Name": "$name",
+		      "Type": "VPN",
+		      "VPN": {
+		          "Type": "OpenVPN",
+		          "Host": "$remote",
+		          "OpenVPN": {
+		                        "ServerCARef": "{$caguid}",
+		                    "AuthRetry": "interact",
+		                    "ClientCertType": "Pattern",
+		                    "ClientCertPattern": {              
+		                          "IssuerCARef": [ "{$caguid}" ]
+		                         },
+		                    "CompLZO": "$complzo",
+		                    "Port": $port,
+		                    "Proto": "$proto",
+				    "Cipher": "$cipher",
+				    "Auth": "$auth",
+		                    "RemoteCertTLS":"server",
+		                    "RemoteCertEKU": "TLS Web Server Authentication",
+		                    "SaveCredentials": false,
+		                    "ServerPollTimeout": 10,
+		                    "Username": "client",
+		                    "KeyDirection":"$keydir",                    
+		                    "TLSAuthContents":"$takey"
+		                     }
+		             }
+		                               } ]
+		}
