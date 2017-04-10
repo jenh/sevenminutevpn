@@ -1,11 +1,14 @@
 #!/bin/bash
 
 # 7 minute VPN and Web server: Installs OpenVPN & Apache on CentOS-based
-# systems. Tested on Lightsail; be sure to open ports: UDP 1194 & TCP 443. Client
-# configuration files (ovpn, ONC, p12) placed at https://IP/downloads
-# (self-signed); username is vpn, password is dropped in ec2-user's home
-# directory (.web). Usage: cd 7minuteVPN && sudo ./build-vpn.sh
-#
+# systems. Tested on Lightsail; be sure to open ports: UDP 1194 & TCP 443.
+# Client configuration files (ovpn, ONC, p12) placed at https://IP/downloads
+# (self-signed cert); username is vpn, password is dropped in ec2-user's home
+# directory (.web). Usage: cd sevenminutevpn && sudo ./build-vpn.sh or
+# paste launchscript.sh into your EC2 user-data/Lightsail launch script
+# window.
+
+
 # Set path
 export STARTDIR=`pwd`
 echo $STARTDIR
