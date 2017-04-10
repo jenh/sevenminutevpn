@@ -32,7 +32,7 @@ Caveat: These scripts were tested on the Amazon Linux AMI using EC2 & Lightsail,
 
 9. Tap the **Connect** tab, then click the **Connect Using SSH** button to open a console connection to your system.
 
-10. Find your login password for the client configuration files:
+10. Check status of the install by running ``tail -f /tmp/.build-vpn.log.$timestamp``. When complete, find your login password for the client configuration files:
 
    ```
    [ec2-user~] cat /home/ec2-user/.web
