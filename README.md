@@ -3,7 +3,7 @@ sevenminutevpn
 
 Build an OpenVPN-based VPN and secure web server to host configs in less than seven minutes on Amazon Lightsail.
 
-Caveat: These scripts were tested on the Amazon Linux AMI using EC2 & Lightsail, and *should* work on almost any CentOS 7.x install...however, they' a're intended to be run on single-purpose ephemeral and disposable VMs -- not production or personal systems.
+Caveat: These scripts were tested on the Amazon Linux AMI using EC2 & Lightsail, and *should* work on almost any CentOS 7.x install...however, they're intended to be run on single-purpose ephemeral and disposable VMs -- not production or personal systems.
 
 1. Log onto Amazon Lightsail [Amazon Lightsail](https://lightsail.aws.amazon.com).
 

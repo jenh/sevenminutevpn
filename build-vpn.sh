@@ -61,7 +61,7 @@ sudo /usr/sbin/openvpn --genkey --secret /etc/openvpn/easy-rsa/ta.key
 # From a good server.conf, you can get this from:
 # awk  '!/^;|^#|^\s*$/' server.conf |awk '{printf "%s\\n",$0}' |sed 's/"/\\"/g'
 printf "***Building base server.conf file***\n\n"
-sudo printf "port 1194\nproto udp\ndev tun\nca /etc/openvpn/easy-rsa/pki/ca.crt\nkey /etc/openvpn/easy-rsa/pki/private/server.key\ncert /etc/openvpn/easy-rsa/pki/issued/server.crt\ndh /etc/openvpn/easy-rsa/pki/dh.pem\nserver 10.8.0.0 255.255.255.0\nifconfig-pool-persist ipp.txt\npush \"redirect-gateway def1 bypass-dhcp\"\npush \"dhcp-option DNS 208.67.222.222\"\npush \"dhcp-option DNS 208.67.220.220\"\nduplicate-cn\nkeepalive 10 60\ntls-version-min 1.2 #Note: Disable if you support Chromebooks\ntls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA\ncipher AES-256-CBC\ntls-auth /etc/openvpn/easy-rsa/ta.key 0\ncomp-lzo\nuser nobody\ngroup nobody\npersist-key\npersist-tun\nstatus openvpn-status.log\nlog /var/log/openvpn.log\nverb 3\nauth SHA256\nserver-ipv6 2001:db8:0:123::/64\ntun-ipv6\npush tun-ipv6\nifconfig-ipv6 2001:db8:0:123::1 2001:db8:0:123::2\npush \"route-ipv6 2001:db8:0:abc::/64\"\npush \"route-ipv6 2000::/3\"\nproto udp6\n#plugin /usr/lib64/openvpn/plugin/lib/openvpn-auth-pam.so login" >> /etc/openvpn/server.conf
+sudo printf "port 1194\nproto udp\ndev tun\nca /etc/openvpn/easy-rsa/pki/ca.crt\nkey /etc/openvpn/easy-rsa/pki/private/server.key\ncert /etc/openvpn/easy-rsa/pki/issued/server.crt\ndh /etc/openvpn/easy-rsa/pki/dh.pem\nserver 10.8.0.0 255.255.255.0\nifconfig-pool-persist ipp.txt\npush \"redirect-gateway def1 bypass-dhcp\"\npush \"dhcp-option DNS 10.8.0.1\"\npush \"dhcp-option DNS 208.67.222.222\"\npush \"dhcp-option DNS 208.67.220.220\"\nduplicate-cn\nkeepalive 10 60\ntls-version-min 1.2 #Note: Disable if you support Chromebooks\ntls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA\ncipher AES-256-CBC\ntls-auth /etc/openvpn/easy-rsa/ta.key 0\ncomp-lzo\nuser nobody\ngroup nobody\npersist-key\npersist-tun\nstatus openvpn-status.log\nlog /var/log/openvpn.log\nverb 3\nauth SHA256\nserver-ipv6 2001:db8:0:123::/64\ntun-ipv6\npush tun-ipv6\nifconfig-ipv6 2001:db8:0:123::1 2001:db8:0:123::2\npush \"route-ipv6 2001:db8:0:abc::/64\"\npush \"route-ipv6 2000::/3\"\nproto udp6\n#plugin /usr/lib64/openvpn/plugin/lib/openvpn-auth-pam.so login" >> /etc/openvpn/server.conf
 
 # Set up NAT
 printf "***Setting up routing***\n\n"
@@ -96,7 +96,7 @@ sudo mkdir /var/www/html/downloads && sudo chown apache:apache /var/www/html/dow
 # Generate a password for the client config directory, place it in ~/ so that user can find it on login.
 # Username is vpn.
 
-rand_pw=`< /dev/urandom tr -dc '_A-Z-a-z-0-9!@><$%^&*()?' | head -c9`; echo $rand_pw >> /home/ec2-user/.web; htdigest_hash=`printf vpn:vpnweb:$rand_pw | md5sum -`; echo "vpn:vpnweb:${htdigest_hash:0:32}" >> /home/ec2-user/.tmp
+rand_pw=`< /dev/urandom tr -dc '_A-Z-a-z-0-9@><^&*()[]+?' | head -c9`; echo $rand_pw >> /home/ec2-user/.web; htdigest_hash=`printf vpn:vpnweb:$rand_pw | md5sum -`; echo "vpn:vpnweb:${htdigest_hash:0:32}" >> /home/ec2-user/.tmp
 
 sudo mv /home/ec2-user/.tmp /etc/httpd/.digestauth
 sudo chown apache:apache /etc/httpd/.digestauth
@@ -116,5 +116,12 @@ cd $STARTDIR/mkcliconf && sudo python mkcliconf.py
 # Move configs to download directory
 sudo mv $STARTDIR/mkcliconf/$myip.* /var/www/html/downloads/
 sudo chown apache:apache /var/www/html/downloads/
+
+# Configure ad-blocking
+cd /home/ec2-user && wget https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+sudo mv -f /home/ec2-user/hosts /etc/hosts
+sudo yum -y install dnsmasq
+sudo service dnsmasq start
+sudo chkconfig dnsmasq on
 
 sudo printf "\n\nALL DONE! Open up ports 443/TCP and 1194/UDP. Navigate\nto https://$myip/downloads, log in using vpn and the password in /home/ec2-user/.web\nand download your client configuration file (files if using Chromebook).\n\n"
