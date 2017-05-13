@@ -28,7 +28,17 @@ printf "\n\n***Updating system\n\n***"
 sudo yum -y update
 
 printf "***Installing OpenVPN***\n\n"
-sudo yum -y install openvpn
+# 05-12-2017: Fix CVE-2017-7479, no longer taking Amazon's base install
+#             Build rpm from 2.3.15 source
+
+#sudo yum -y install openvpn
+
+sudo yum -y install gcc rpm-build openssl-devel lzo-devel pam-devel git
+
+cd $STARTDIR && wget https://swupdate.openvpn.org/community/releases/openvpn-2.3.15.tar.gz
+
+cd $STARTDIR && rpmbuild -tb openvpn-2.3.15.tar.gz
+sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/openvpn-2.3.15-1.x86_64.rpm
 
 printf "***Adding OpenVPN to startup***\n\n"
 sudo chkconfig openvpn on
