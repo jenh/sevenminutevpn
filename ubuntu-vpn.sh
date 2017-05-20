@@ -82,7 +82,7 @@ rm -r $STARTDIR/easy-rsa
 sudo cp /etc/openvpn/easy-rsa/vars.example /etc/openvpn/easy-rsa/vars
 
 printf "********************************\n"
-printf "* Setting server name to $myip *\n"
+printf "* Setting server name to $MYIP *\n"
 printf "********************************\n"
 printf "\n\n"
 
@@ -211,7 +211,7 @@ sudo apt-get install python -y
 cd /tmp/sevenminutevpn/mkcliconf && sudo python mkcliconf.py
 
 # Move configs to download directory
-sudo mv $STARTDIR/sevenminutevpn/mkcliconf/$MYIP.* /var/www/html/downloads/
+sudo mv /tmp/sevenminutevpn/mkcliconf/$MYIP.* /var/www/html/downloads/
 sudo chown www-data:www-data /var/www/html/downloads/
 
 
@@ -225,7 +225,6 @@ cd /tmp && wget https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 sudo mv -f /tmp/hosts /etc/hosts
 # Ham-handed, but...
 sudo sed -i "s/127.0.0.1 localhost.localdomain/127.0.0.1 localhost.localdomain\n127.0.0.1 $HOSTNAME/g" /etc/hosts
-sudo printf "127.0.0.1 $HOSTNAME\n$(cat /etc/hosts)" > /etc/hosts
 sudo apt-get install dnsmasq -y
 sudo service dnsmasq start
 
@@ -239,7 +238,7 @@ sudo service openvpn start
 
 printf "*****************************************************************\n"
 printf "* ALL DONE! Open up ports 443/TCP and 1194/UDP. Navigate to     *\n"
-printf "* https://$myip/downloads, log in using vpn and the      *\n"
+printf "* https://$MYIP/downloads, log in using vpn and the      *\n"
 printf "* password in /home/[user]/.web and download your client        *\n"
 printf "*  configuration file (files if using Chromebook).              *\n"
 printf "*****************************************************************\n"

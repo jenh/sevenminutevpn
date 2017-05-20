@@ -4,8 +4,9 @@
 # and deploy VPN and config files. See README.md for step-by-step connection
 # and configuration file download instructions.
 
-source /etc/os-release
+ID_LIKE=`cat /etc/os-release |grep ID_LIKE|cut -f 2 -d '='|sed 's/\"//g'`
 
+echo ${ID_LIKE}
 if [ "${ID_LIKE}" = "rhel fedora" ]; then
  echo Detected RHELish OS, using yum to install
  sudo yum -y install git;
@@ -17,6 +18,7 @@ else
 fi
 
 git clone https://github.com/jenh/sevenminutevpn.git /tmp/sevenminutevpn
+chmod 755 /tmp/sevenminutevpn/*.sh
 
 if [ "${ID_LIKE}" = "debian" ]; then
   cd /tmp/sevenminutevpn && sudo ./ubuntu-vpn.sh
