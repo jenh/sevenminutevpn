@@ -6,7 +6,6 @@
 
 ID_LIKE=`cat /etc/os-release |grep ID_LIKE|cut -f 2 -d '='|sed 's/\"//g'`
 
-echo ${ID_LIKE}
 if [ "${ID_LIKE}" = "rhel fedora" ]; then
  echo Detected RHELish OS, using yum to install
  sudo yum -y install git;
