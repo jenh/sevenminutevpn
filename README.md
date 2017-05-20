@@ -1,11 +1,29 @@
-sevenminutevpn
-==============
+# sevenminutevpn
 
-Build an OpenVPN-based VPN and secure web server to host configs in less than seven minutes on Amazon Lightsail. This is a companion repository for the book [The Seven Minute Server: Build Your Own VPN](https://www.amazon.com/Minute-Server-Build-Your-Own/dp/1545371016) but you don't need the book to run and use this.
+Build an OpenVPN-based VPN and secure web server to host configs in less than seven minutes on Amazon Lightsail. This is a companion repository for the book [The Seven Minute Server: Build Your Own VPN](https://www.amazon.com/Minute-Server-Build-Your-Own/dp/1545371016) but you don't necessarily need the book to run and use this.
 
-Caveat: These scripts were tested on the Amazon Linux AMI using EC2 & Lightsail, and *should* work on almost any CentOS 7.x install...however, they're intended to be run on single-purpose ephemeral and disposable VMs -- not production or personal systems. This currently installs 2.3.15, which has been updated to resolve vulnerabilities reported in recent security audits. 2.4.2 coming soon.
+Caveat: These scripts were tested on the Amazon Linux AMI and the Ubuntu 16.04 AMI using Amazon EC2/Lightsail, and *should* work on almost any CentOS 7.x or Ubuntu 16.04 install...however, they're intended to be run on single-purpose ephemeral and disposable cloud-based systems -- not production or personal systems. Any time you're letting a random script muck around with your firewall, it's a good idea to use something with a standard configuration that you can painlessly blow away and recreate.
 
-1. Log onto Amazon Lightsail [Amazon Lightsail](https://lightsail.aws.amazon.com).
+This currently installs 2.3.16 (stable), which has been updated to resolve vulnerabilities reported in recent security audits. 2.4.2 coming sometime soon.
+
+## Instructions
+
+1. From your server:
+
+    git clone https://github.com/jenh/sevenminutevpn.git /tmp/sevenminutevpn
+
+2. chmod 755 /tmp/sevenminutevpn/\*.sh
+
+3. Run the following, where *script-name* is ubuntu-vpn.sh if you're using Debian/Ubuntu or build-vpn.sh if you're using CentOS/Red Hat.
+
+    cd /tmp/sevenminutevpn && ./*script-name*.sh
+
+4. When the scripts are finished, jump to step 10 in the Lightsail instructions.
+
+
+## Lightsail Instructions
+
+1. Log onto [Amazon Lightsail](https://lightsail.aws.amazon.com).
 
 2. Click **Create Instance**.
 
@@ -48,12 +66,14 @@ If you can't connect within a few seconds, check to make sure you enabled **UDP 
 
 
 
+
+
 For ChromeOS Users
 ------------------
 
 ChromeOS on Google Chromebook requires a few extra steps to configure.
 
-You'll also want to disable ``tls-version-min`` in ``/etc/openvpn/server.conf`` and restart OpenVPN (``sudo service openvpn restart``) as ChromeOS is stuck on OpenVPN 2.3.2, which can't go higher than TLS 1.0 and can't connect if we bar the door to them. We mitigate around that a little by restricting the TLS ciphers that can be used in our config. Also, in testing, other modern OpenVPN clients will negotiate with TLS 1.1 or 1.2 even if not forced. If you're a ChromeOS user, help us out and star this [Chromium bug](https://bugs.chromium.org/p/chromium/issues/detail?id=707517) so that we can encourage Google to update OpenVPN on ChromeOS.
+You'll also want to disable ``tls-version-min`` in ``/etc/openvpn/server.conf`` and restart OpenVPN (``sudo service openvpn restart``) as ChromeOS is stuck on OpenVPN 2.3.2, which can't go higher than TLS 1.0 and can't connect if we bar the door to them. We mitigate around that a little by restricting the TLS ciphers that can be used in our config. Also, in testing, other modern OpenVPN clients will negotiate with TLS 1.1 or 1.2 even if not forced. If you're a ChromeOS user, help us out and star this [Chromium bug](https://bugs.chromium.org/p/chromium/issues/detail?id=707517) so that we can encourage Google to update OpenVPN on ChromeOS (there has been some developer activity on these bugs recently, so hopefully this won't be an issue for too much longer).
 
 1. On your Chromebook, open Chrome, chrome://settings/certificates.
 2. Import & Bind to Device, select the p12. Currently, this is given an insecure "chrome" password on generation; you can change this in the script if you want.
