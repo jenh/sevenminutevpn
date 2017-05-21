@@ -8,7 +8,9 @@ This currently installs 2.3.16 (stable), which has been updated to resolve vulne
 
 ## Instructions
 
-1. From your server:
+### Running From the Command Line
+
+1. ssh into your server and run:
 
     git clone https://github.com/jenh/sevenminutevpn.git /tmp/sevenminutevpn
 
@@ -21,7 +23,7 @@ This currently installs 2.3.16 (stable), which has been updated to resolve vulne
 4. When the scripts are finished, jump to step 10 in the Lightsail instructions.
 
 
-## Lightsail Instructions
+### Lightsail Instructions
 
 1. Log onto [Amazon Lightsail](https://lightsail.aws.amazon.com).
 

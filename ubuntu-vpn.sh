@@ -18,6 +18,17 @@ echo $STARTDIR
 
 export logname=`logname`
 
+# If we're running from the command line, figure out logged-in user for .web
+# file. If we're running from user-data on ec2, logname doesn't work, so we'll
+# use ubuntu, ec2's default Ubunut user.
+
+if [ -z $logname ];
+then
+  export logname=`ubuntu`
+  echo $logname
+fi
+
+
 export openvpn_rel="2.3"
 # Get distro codename
 source /etc/lsb-release
@@ -28,7 +39,7 @@ LOG=/tmp/.build-vpn.log`date +%s`
 exec > >(tee -a $LOG) 2>&1
 
 if [ "$EUID" -ne 0 ]
-  then echo "Script must be run as root. Usage: sudo ./build-vpn.sh"
+  then echo "Script must be run as root. Usage: sudo ./ubuntu-vpn.sh"
   exit
 fi
 
