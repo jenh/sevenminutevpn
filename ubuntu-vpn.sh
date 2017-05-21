@@ -24,8 +24,8 @@ export logname=`logname`
 
 if [ -z $logname ];
 then
-  export logname=`ubuntu`
-  echo $logname
+  export logname="ubuntu"
+  echo Will place download password at /home/$logname/.web
 fi
 
 
