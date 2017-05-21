@@ -23,6 +23,18 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+export logname=`logname`
+
+# If we're running from the command line, figure out logged-in user for .web
+# file. If we're running from user-data on ec2, logname doesn't work, so we'll
+# use ec2-user, ec2's default Amazon AMI user.
+
+if [ -z $logname ];
+then
+  export logname="ec2-user"
+  echo Will place download password at /home/$logname/.web
+fi
+
 printf "************************************************************\n"
 printf "* Starting install. Output and errors logged to            *\n"
 printf "* /tmp/$LOG.                                               *\n"
@@ -164,12 +176,12 @@ sudo mkdir /var/www/html/downloads && sudo chown apache:apache /var/www/html/dow
 # Generate a password for the client config directory, place it in ~/ so that user can find it on login.
 # Username is vpn.
 
-rand_pw=`< /dev/urandom tr -dc '_A-Z-a-z-0-9@><^&*()[]+?' | head -c9`; echo $rand_pw >> /home/ec2-user/.web; htdigest_hash=`printf vpn:vpnweb:$rand_pw | md5sum -`; echo "vpn:vpnweb:${htdigest_hash:0:32}" >> /tmp/.tmp
+rand_pw=`< /dev/urandom tr -dc '_A-Z-a-z-0-9@><^&*()[]+?' | head -c9`; echo $rand_pw >> /home/$logname/.web; htdigest_hash=`printf vpn:vpnweb:$rand_pw | md5sum -`; echo "vpn:vpnweb:${htdigest_hash:0:32}" >> /tmp/.tmp
 
 sudo mv /tmp/.tmp /etc/httpd/.digestauth
 sudo chown apache:apache /etc/httpd/.digestauth
 
-sudo chown ec2-user:ec2-user /home/ec2-user/.web
+sudo chown $logname:$logname /home/$logname/.web
 
 sudo printf "\n<Directory \"/var/www/html/downloads\">\nAuthType Digest\nAuthName \"vpnweb\"\nAuthUserFile /etc/httpd/.digestauth\nRequire valid-user\n</Directory>" >> /etc/httpd/conf/httpd.conf
 

@@ -20,7 +20,7 @@ export logname=`logname`
 
 # If we're running from the command line, figure out logged-in user for .web
 # file. If we're running from user-data on ec2, logname doesn't work, so we'll
-# use ubuntu, ec2's default Ubunut user.
+# use ubuntu, ec2's default ubuntu user.
 
 if [ -z $logname ];
 then
