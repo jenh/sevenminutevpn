@@ -4,7 +4,7 @@ Build an OpenVPN-based VPN and secure web server to host configs in less than se
 
 Caveat: These scripts were tested on the Amazon Linux AMI and the Ubuntu 16.04 AMI using Amazon EC2/Lightsail, and *should* work on almost any CentOS 7.x or Ubuntu 16.04 install...however, they're intended to be run on single-purpose ephemeral and disposable cloud-based systems -- not production or personal systems. Any time you're letting a random script muck around with your firewall, it's a good idea to use something with a standard configuration that you can painlessly blow away and recreate.
 
-This currently installs 2.3.16 (stable), which has been updated to resolve vulnerabilities reported in recent security audits. 2.4.2 coming sometime soon.
+This currently installs 2.3.17 (stable), which has been updated to resolve vulnerabilities reported in recent security audits. 2.4.2 coming sometime soon.
 
 ## Instructions
 
@@ -74,8 +74,6 @@ For ChromeOS Users
 ------------------
 
 ChromeOS on Google Chromebook requires a few extra steps to configure.
-
-You'll also want to disable ``tls-version-min`` in ``/etc/openvpn/server.conf`` and restart OpenVPN (``sudo service openvpn restart``) as ChromeOS is stuck on OpenVPN 2.3.2, which can't go higher than TLS 1.0 and can't connect if we bar the door to them. We mitigate around that a little by restricting the TLS ciphers that can be used in our config. Also, in testing, other modern OpenVPN clients will negotiate with TLS 1.1 or 1.2 even if not forced. If you're a ChromeOS user, help us out and star this [Chromium bug](https://bugs.chromium.org/p/chromium/issues/detail?id=707517) so that we can encourage Google to update OpenVPN on ChromeOS (there has been some developer activity on these bugs recently, so hopefully this won't be an issue for too much longer).
 
 1. On your Chromebook, open Chrome, chrome://settings/certificates.
 2. Import & Bind to Device, select the p12. Currently, this is given an insecure "chrome" password on generation; you can change this in the script if you want.
