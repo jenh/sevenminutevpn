@@ -62,6 +62,7 @@ printf "* Updating system *\n"
 printf "*******************\n"
 printf "\n\n"
 
+export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update -y
 sudo apt-get upgrade -y
 
