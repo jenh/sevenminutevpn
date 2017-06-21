@@ -72,10 +72,10 @@ printf "\n\n"
 
 wget -O - https://swupdate.openvpn.net/repos/repo-public.gpg|sudo apt-key add -
 
-sudo bash -c "echo "deb http://build.openvpn.net/debian/openvpn/release/$openvpn_rel $DISTRIB_CODENAME main" > /etc/apt/sources.list.d/openvpn-aptrepo.list"
+sudo bash -c "echo 'deb http://build.openvpn.net/debian/openvpn/release/2.3 xenial main' > /etc/apt/sources.list.d/openvpn-aptrepo.list"
 
 # Could install easy-rsa here as well, but easy-rsa3 from github is fuller/easier
-
+sudo apt-get update
 sudo apt-get -y install openvpn
 
 printf "*************************************\n"
