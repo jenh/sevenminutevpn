@@ -62,9 +62,8 @@ printf "* Updating system *\n"
 printf "*******************\n"
 printf "\n\n"
 
-export DEBIAN_FRONTEND=noninteractive
 sudo apt-get update -y
-sudo apt-get upgrade -y
+sudo DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade -y
 
 printf "**********************\n"
 printf "* Installing OpenVPN *\n"
