@@ -101,6 +101,7 @@ sudo sed -i 's/$PWD/\/etc\/openvpn\/easy-rsa/g' /etc/openvpn/easy-rsa/vars
 sudo sed -i "s/^#set_var EASYRSA\t/set_var\t EASYRSA\t/g" /etc/openvpn/easy-rsa/vars
 sudo sed -i "s/ChangeMe/$MYIP/g" /etc/openvpn/easy-rsa/vars
 sudo sed -i "s/^#set_var\ EASYRSA_REQ_CN/set_var\ EASYRSA_REQ_CN/g" /etc/openvpn/easy-rsa/vars
+sudo sed -i "s/^#set_var\ EASYRSA_PKI/set_var\ EASYRSA_PKI/g" /etc/openvpn/easy-rsa/vars
 
 printf "***************************************\n"
 printf "* Building CA and generating certs... *\n"
