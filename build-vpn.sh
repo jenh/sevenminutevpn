@@ -164,7 +164,7 @@ printf "\n\n"
 
 sudo sed -i "s/#ServerName www.example.com:80/ServerName $myip/g" /etc/httpd/conf/httpd.conf
 
-sudo printf "\n<VirtualHost *:80>\nServerName $myip\nRedirect / https://$myip/\n</VirtualHost>\n<VirtualHost *:443>\nServerName $myip\n</VirtualHost>\n\nServerSignature Off\nServerTokens Prod\nHeader set X-Robots-Tag \"noindex\"\n\n<IfModule headers_module>\n<FilesMatch \".ovpn$\">\nHeader Set Content-type application/x-openvpn-profile\n</FilesMatch>\n</IfModule>" >> /etc/httpd/conf/httpd.conf
+sudo printf "\n<VirtualHost *:80>\nServerName $myip\nRedirect / https://$myip/\n</VirtualHost>\n<VirtualHost *:443>\nServerName $myip\nSSLCertificateFile /etc/pki/tls/certs/localhost.crt\nSSLCertificateKeyFile /etc/pki/tls/private/localhost.key\n</VirtualHost>\n\nServerSignature Off\nServerTokens Prod\nHeader set X-Robots-Tag \"noindex\"\n\n<IfModule headers_module>\n<FilesMatch \".ovpn$\">\nHeader Set Content-type application/x-openvpn-profile\n</FilesMatch>\n</IfModule>" >> /etc/httpd/conf/httpd.conf
 
 printf "******************************************************************\n"
 printf "* Generating client config download directory at host/downloads. *\n"
