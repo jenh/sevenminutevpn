@@ -149,16 +149,20 @@ printf "* Installing Apache HTTP 2.4 *\n"
 printf "******************************\n"
 printf "\n\n"
 
-# For Amazon Linux 2
-sudo yum -y install httpd
+# Amazon Linux 2 has Apache 2.4 in httpd; 2018-03 image is httpd24
 
-# For Amazon Lightsail Linux AMI
-sudo yum -y install httpd24
-
-sudo chkconfig httpd on
-
-# For Amazon Linux 2
-sudo yum -y install mod_ssl
+if `yum search httpd24 |grep -q matched`
+then
+    echo "We have a 2.4 package, install 2.4."
+    sudo yum -y install httpd24
+    sudo chkconfig httpd on
+    sudo yum -y install mod24_ssl
+else
+    echo "We do not see a 2.4 package, httpd is likely latest"
+    sudo yum -y install httpd
+    sudo chkconfig httpd on
+    sudo yum -y install mod_ssl
+fi
 
 #For Amazon Lightsail Linux AMI
 
