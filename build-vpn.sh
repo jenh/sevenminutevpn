@@ -124,6 +124,7 @@ printf "* Setting up routing *\n"
 printf "**********************\n"
 printf "\n\n"
 
+# For Amazon Linux 2:
 sudo yum -y install iptables-services
 
 sudo iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
@@ -131,6 +132,9 @@ sudo service iptables save
 sudo service iptables restart
 
 # Enable IP forwarding
+# For Lightsail Amazon Linux with config in sysctl
+sed -i "s/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/g" /etc/sysctl.conf
+# For Amazon Linux 2
 sudo echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.d/11-sysctl.conf
 sudo sysctl --system
 
@@ -145,9 +149,18 @@ printf "* Installing Apache HTTP 2.4 *\n"
 printf "******************************\n"
 printf "\n\n"
 
+# For Amazon Linux 2
 sudo yum -y install httpd
+
+# For Amazon Lightsail Linux AMI
+sudo yum -y install httpd24
+
 sudo chkconfig httpd on
+
+# For Amazon Linux 2
 sudo yum -y install mod_ssl
+
+#For Amazon Lightsail Linux AMI
 
 printf "*******************************\n"
 printf "* Installing Self-Signed Cert *\n"
