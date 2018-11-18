@@ -124,13 +124,15 @@ printf "* Setting up routing *\n"
 printf "**********************\n"
 printf "\n\n"
 
+sudo yum -y install iptables-services
+
 sudo iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
 sudo service iptables save
 sudo service iptables restart
 
 # Enable IP forwarding
-sed -i "s/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/g" /etc/sysctl.conf
-sudo sysctl -p
+sudo echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.d/11-sysctl.conf
+sudo sysctl --system
 
 printf "********************\n"
 printf "* Starting OpenVPN *\n"
