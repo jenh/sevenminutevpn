@@ -6,10 +6,11 @@
 
 ID_LIKE=`cat /etc/os-release |grep ID_LIKE|cut -f 2 -d '='|sed 's/\"//g'`
 
-if [ "${ID_LIKE}" = "rhel fedora" ]; then
+echo "ID is $ID_LIKE"
+if [[ ${ID_LIKE} == *"rhel"* ]]; then
  echo Detected RHELish OS, using yum to install
  sudo yum -y install git;
-elif [ "${ID_LIKE}" = "debian" ]; then
+elif [[ ${ID_LIKE} == *"debian"* ]]; then
  echo Detected Debianesque OS, using apt to install
  sudo apt-get -y install git;
 else

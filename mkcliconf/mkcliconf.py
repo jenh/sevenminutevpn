@@ -17,13 +17,13 @@ else:
 
 if (args.keystore):
     keystore = args.keystore.rstrip('\\')
-else:  
+else:
     keystore = "/etc/openvpn/easy-rsa/pki"
 
 # Get the CA name from OpenVPN's cert
 CN = subprocess.Popen('openssl x509 -noout -subject -in ' + keystore + "/ca.crt", shell=True, stdout=subprocess.PIPE)
 for line in CN.stdout:
-    server_name = line.strip().split("=")[2]
+    server_name = line.strip().split("=")[2].lstrip()
 
 print "\nUsing " + conf_file + " as server.conf and" + keystore + " as keystore folder.\n"
 #print "Will output: \n\t - ovpn file for importing into Linux/Windows/Mac/iPhone/Android.\n\t - p12 with password chrome for importing into ChromeOS \n\t - A valid onc file for Chrome.\n"
@@ -170,4 +170,3 @@ generated = subprocess.Popen('ls |grep ' + server_name ,shell=True, stdout=subpr
 print "Generated:\n"
 for line in generated.stdout:
     print "\t-" + line
-

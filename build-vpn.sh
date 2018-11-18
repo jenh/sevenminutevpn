@@ -143,9 +143,9 @@ printf "* Installing Apache HTTP 2.4 *\n"
 printf "******************************\n"
 printf "\n\n"
 
-sudo yum -y install httpd24
+sudo yum -y install httpd
 sudo chkconfig httpd on
-sudo yum -y install mod24_ssl
+sudo yum -y install mod_ssl
 
 printf "*******************************\n"
 printf "* Installing Self-Signed Cert *\n"
