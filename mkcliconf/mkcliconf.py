@@ -142,6 +142,11 @@ try:
         onc = onc.replace('$cacert', cakey)
         onc = onc.replace('$takey', takey)
         onc = onc.replace('$remote', server_name)
+        try:
+            complzo
+            onc = onc.replace("$complzo", complzo)
+        except:
+            onc = re.sub(r"\"CompLZO.*,","",onc)
         onc = onc.replace("$complzo", complzo)
         onc = onc.replace("$port",port)
         onc = onc.replace("$proto",proto)
