@@ -147,7 +147,6 @@ try:
             onc = onc.replace("$complzo", complzo)
         except:
             onc = re.sub(r"\"CompLZO.*,","",onc)
-        onc = onc.replace("$complzo", complzo)
         onc = onc.replace("$port",port)
         onc = onc.replace("$proto",proto)
         onc = onc.replace("$cipher",cipher)
