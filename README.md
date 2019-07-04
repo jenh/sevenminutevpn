@@ -2,9 +2,9 @@
 
 Build an OpenVPN-based VPN and secure web server to host configs in less than seven minutes on Amazon Lightsail. This is a companion repository for the book [The Seven Minute Server: Build Your Own VPN](https://www.amazon.com/Minute-Server-Build-Your-Own/dp/1545371016) but you don't necessarily need the book to run and use this.
 
-Caveat: These scripts were tested on the Amazon Linux AMI and the Ubuntu 16.04 AMI using Amazon EC2/Lightsail, and *should* work on almost any CentOS 7.x or Ubuntu 16.04 install...however, they're intended to be run on single-purpose ephemeral and disposable cloud-based systems -- not production or personal systems. Any time you're letting a random script muck around with your firewall, it's a good idea to use something with a standard configuration that you can painlessly blow away and recreate.
+Caveat: These scripts were tested on the Amazon Linux 2018 and Amazon Linux 2 AMIs and the Ubuntu 16.04 AMI using Amazon EC2/Lightsail, and *should* work on almost any CentOS 7.x or Ubuntu 16.04 install...however, they're intended to be run on single-purpose ephemeral and disposable cloud-based systems -- not production or personal systems. Any time you're letting a random script muck around with your firewall, it's a good idea to use something with a standard configuration that you can painlessly blow away and recreate.
 
-This currently installs 2.3.17 (stable), which has been updated to resolve vulnerabilities reported in recent security audits. 2.4.2 coming sometime soon.
+This currently installs 2.4.7 (stable) on Amazon Linux/RHEL/CentOS. The Ubuntu scripts still install 2.3...will update if there's a demand for it.
 
 ## Instructions
 
@@ -33,7 +33,7 @@ This currently installs 2.3.17 (stable), which has been updated to resolve vulne
 
 4. Click **Add Launch Script** and paste the contents of ``launchscript.sh`` inside.
 
-5. Choose the **$5/First Month Free** plan.
+5. Choose the **$3.50/First Month Free** plan.
 
 6. Enter a name for your instance in the **Name Your Instance** field and click **Create.**
 

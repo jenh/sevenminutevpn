@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 7 minute VPN and Web server: Installs OpenVPN & Apache on Ubuntu-based
+# DIY VPN and Web server: Installs OpenVPN & Apache on Ubuntu-based
 # systems. Tested on Lightsail; be sure to open ports: UDP 1194 & TCP 443.
 # Client configuration files (ovpn, ONC, p12) placed at https://IP/downloads
 # (self-signed cert); username is vpn, password is dropped in ubuntu user's home
