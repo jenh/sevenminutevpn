@@ -4,7 +4,7 @@ Build an OpenVPN-based VPN and secure web server to host configs in less than se
 
 Caveat: These scripts were tested on the Amazon Linux 2018 and Amazon Linux 2 AMIs and the Ubuntu 16.04 AMI using Amazon EC2/Lightsail, and *should* work on almost any CentOS 7.x or Ubuntu 16.04 install...however, they're intended to be run on single-purpose ephemeral and disposable cloud-based systems -- not production or personal systems. Any time you're letting a random script muck around with your firewall, it's a good idea to use something with a standard configuration that you can painlessly blow away and recreate.
 
-This currently installs 2.4.7 (stable) on Amazon Linux/RHEL/CentOS. The Ubuntu scripts still install 2.3...will update if there's a demand for it.
+This currently installs 2.4.9 (stable) on Amazon Linux/RHEL/CentOS (tested on CentOS 8, image centos-8-v20200910, on Google Cloud Platform). The Ubuntu scripts still install 2.3...will update if there's a demand for it.
 
 ## Instructions
 
@@ -18,7 +18,7 @@ This currently installs 2.4.7 (stable) on Amazon Linux/RHEL/CentOS. The Ubuntu s
 
 3. Run the following, where *script-name* is ubuntu-vpn.sh if you're using Debian/Ubuntu or build-vpn.sh if you're using CentOS/Red Hat.
 
-    cd /tmp/sevenminutevpn && ./*script-name*.sh
+    cd /tmp/sevenminutevpn && sudo ./*script-name*.sh
 
 4. When the scripts are finished, jump to step 10 in the Lightsail instructions.
 

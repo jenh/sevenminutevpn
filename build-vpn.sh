@@ -12,6 +12,8 @@
 # Set path
 export STARTDIR=`pwd`
 echo $STARTDIR
+export PATH=$PATH:/usr/local/bin:/usr/local/sbin
+echo $PATH
 
 # Set log file
 LOG=/tmp/.build-vpn.log`date +%s`
@@ -35,6 +37,12 @@ then
   echo Will place download password at /home/$logname/.web
 fi
 
+# Check for python
+if [ -z /usr/bin/python3 ];
+then
+ yum -y install python3 
+fi
+
 # Are we systemdable?
 hostnamectl=`hostnamectl`;if [ -z "$hostnamectl" ]; then systemd="false"; else systemd="true"; fi
 
@@ -50,49 +58,55 @@ printf "* Updating system *\n"
 printf "*******************\n"
 printf "\n\n"
 
-sudo yum -y update
+yum -y update
 
 printf "**********************\n"
 printf "* Installing OpenVPN *\n"
 printf "**********************\n"
 printf "\n\n"
 # Fix CVE-2017-7479, no longer taking Amazon's base install
-# Build rpm from 2.4.7 source
+# Build rpm from 2.4.9 source
 
-sudo yum -y install gcc rpm-build openssl-devel lzo-devel pam-devel git
+yum -y install gcc rpm-build openssl-devel lzo-devel pam-devel git wget make systemd-devel
 
-cd $STARTDIR && wget https://swupdate.openvpn.org/community/releases/openvpn-2.4.7.tar.gz
+cd $STARTDIR && wget https://swupdate.openvpn.org/community/releases/openvpn-2.4.9.tar.gz && tar -xzvf openvpn-2.4.9.tar.gz
 
-if [[ $systemd = "true" ]];
-then
-  cd $STARTDIR && rpmbuild -tb openvpn-2.4.7.tar.gz --with="enablesystemd=yes"
-else
-  cd $STARTDIR && rpmbuild -tb openvpn-2.4.7.tar.gz
-fi 
+cd $STARTDIR/openvpn-2.4.9 && ./configure --enable-systemd && make && make install
 
-sudo rpm -ivh ~/rpmbuild/RPMS/x86_64/openvpn-2.4.7-1.x86_64.rpm
+#if [[ $systemd = "true" ]];
+#then
+#  cd $STARTDIR && rpmbuild -tb openvpn-2.4.9.tar.gz --with="enablesystemd=yes"
+#else
+#  cd $STARTDIR && rpmbuild -tb openvpn-2.4.9.tar.gz
+#fi 
 
 printf "*****************************\n"
 printf "* Adding OpenVPN to startup *\n"
 printf "*****************************\n"
 printf "\n\n"
+systemctl enable openvpn-server@server 
+#sudo chkconfig openvpn on
 
-sudo chkconfig openvpn on
+export openvpnbinary=$(which openvpn)
+echo "Found binary as $openvpnbinary"
 
 printf "*************************************\n"
 printf "* Installing git & cloning easy-rsa *\n"
 printf "*************************************\n"
 printf "\n\n"
 
-sudo yum -y install git
 git clone https://github.com/OpenVPN/easy-rsa.git
 
+# Create /etc/openvpn
+
+mkdir -p /etc/openvpn/server
+
 # Copy easy-rsa over & delete it from local
-sudo cp -r easy-rsa/easyrsa3 /etc/openvpn/easy-rsa
+cp -r easy-rsa/easyrsa3 /etc/openvpn/easy-rsa
 rm -r $STARTDIR/easy-rsa
 
 # Move vars, find public IP and put it in there, set easy-rsa home directory
-sudo cp /etc/openvpn/easy-rsa/vars.example /etc/openvpn/easy-rsa/vars
+cp /etc/openvpn/easy-rsa/vars.example /etc/openvpn/easy-rsa/vars
 myip=$(curl checkip.amazonaws.com)
 
 printf "********************************\n"
@@ -100,22 +114,22 @@ printf "* Setting server name to $myip *\n"
 printf "********************************\n"
 printf "\n\n"
 
-sudo sed -i 's/$PWD/\/etc\/openvpn\/easy-rsa/g' /etc/openvpn/easy-rsa/vars
-sudo sed -i "s/^#set_var EASYRSA\t/set_var\t EASYRSA\t/g" /etc/openvpn/easy-rsa/vars
-sudo sed -i "s/ChangeMe/$myip/g" /etc/openvpn/easy-rsa/vars
-sudo sed -i "s/^#set_var\ EASYRSA_REQ_CN/set_var\ EASYRSA_REQ_CN/g" /etc/openvpn/easy-rsa/vars
-sudo sed -i "s/^#set_var\ EASYRSA_PKI/set_var\ EASYRSA_PKI/g" /etc/openvpn/easy-rsa/vars
+sed -i 's/$PWD/\/etc\/openvpn\/easy-rsa/g' /etc/openvpn/easy-rsa/vars
+sed -i "s/^#set_var EASYRSA\t/set_var\t EASYRSA\t/g" /etc/openvpn/easy-rsa/vars
+sed -i "s/ChangeMe/$myip/g" /etc/openvpn/easy-rsa/vars
+sed -i "s/^#set_var\ EASYRSA_REQ_CN/set_var\ EASYRSA_REQ_CN/g" /etc/openvpn/easy-rsa/vars
+sed -i "s/^#set_var\ EASYRSA_PKI/set_var\ EASYRSA_PKI/g" /etc/openvpn/easy-rsa/vars
 
 printf "***************************************\n"
 printf "* Building CA and generating certs... *\n"
 printf "***************************************\n"
 printf "\n\n"
-sudo /etc/openvpn/easy-rsa/easyrsa init-pki
-sudo /etc/openvpn/easy-rsa/easyrsa --batch build-ca nopass
-sudo /etc/openvpn/easy-rsa/easyrsa build-server-full server nopass
-sudo /etc/openvpn/easy-rsa/easyrsa gen-dh
-sudo /etc/openvpn/easy-rsa/easyrsa build-client-full client nopass
-sudo /usr/sbin/openvpn --genkey --secret /etc/openvpn/easy-rsa/ta.key
+/etc/openvpn/easy-rsa/easyrsa init-pki
+/etc/openvpn/easy-rsa/easyrsa --batch build-ca nopass
+/etc/openvpn/easy-rsa/easyrsa build-server-full server nopass
+/etc/openvpn/easy-rsa/easyrsa gen-dh
+/etc/openvpn/easy-rsa/easyrsa build-client-full client nopass
+$openvpnbinary --genkey --secret /etc/openvpn/easy-rsa/ta.key
 
 # Oh so ugly; PAM auth is disabled, disable and adduser nologin if you want to use it
 # From a good server.conf, you can get this from:
@@ -127,7 +141,7 @@ printf "**********************************\n"
 printf "\n\n"
 
 # OpenVPN 2.4 options
-sudo printf "port 1194\nproto udp\nproto udp6\ndev tun\nca /etc/openvpn/easy-rsa/pki/ca.crt\ncert /etc/openvpn/easy-rsa/pki/issued/server.crt\nkey /etc/openvpn/easy-rsa/pki/private/server.key\ndh /etc/openvpn/easy-rsa/pki/dh.pem\nserver 10.8.0.0 255.255.255.0\nifconfig-ipv6 2001:db8:0:123::1 2001:db8:0:123::2\nifconfig-pool-persist ipp.txt\npush \"redirect-gateway def1 bypass-dhcp\"\npush \"redirect-gateway ipv6\"\npush \"route-ipv6 2001:db8:0:abc::/64\"\npush \"route-ipv6 2000::/3\"\npush \"dhcp-option DNS 10.8.0.1\"\npush \"dhcp-option DNS 208.67.222.222\"\npush \"dhcp-option DNS 208.67.220.220\"\nduplicate-cn\nkeepalive 10 120\ntls-auth /etc/openvpn/easy-rsa/ta.key 0\ncipher AES-256-CBC\nuser nobody\ngroup nobody\npersist-key\npersist-tun\nstatus openvpn-status.log\nverb 3\nexplicit-exit-notify 1\ntls-version-min 1.2\nauth SHA256\ntls-cipher TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-CBC-SHA384:TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA\n#plugin plugin /usr/lib64/openvpn/plugins/openvpn-plugin-auth-pam.so login" >> /etc/openvpn/server.conf
+printf "port 1194\nproto udp\nproto udp6\ndev tun\nca /etc/openvpn/easy-rsa/pki/ca.crt\ncert /etc/openvpn/easy-rsa/pki/issued/server.crt\nkey /etc/openvpn/easy-rsa/pki/private/server.key\ndh /etc/openvpn/easy-rsa/pki/dh.pem\nserver 10.8.0.0 255.255.255.0\nifconfig-ipv6 2001:db8:0:123::1 2001:db8:0:123::2\nifconfig-pool-persist ipp.txt\npush \"redirect-gateway def1 bypass-dhcp\"\npush \"redirect-gateway ipv6\"\npush \"route-ipv6 2001:db8:0:abc::/64\"\npush \"route-ipv6 2000::/3\"\npush \"dhcp-option DNS 10.8.0.1\"\npush \"dhcp-option DNS 208.67.222.222\"\npush \"dhcp-option DNS 208.67.220.220\"\nduplicate-cn\nkeepalive 10 120\ntls-auth /etc/openvpn/easy-rsa/ta.key 0\ncipher AES-256-CBC\nuser nobody\ngroup nobody\npersist-key\npersist-tun\nstatus openvpn-status.log\nverb 3\nexplicit-exit-notify 1\ntls-version-min 1.2\nauth SHA256\ntls-cipher TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384:TLS-ECDHE-RSA-WITH-AES-256-CBC-SHA384:TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA\n#plugin plugin /usr/lib64/openvpn/plugins/openvpn-plugin-auth-pam.so login" >> /etc/openvpn/server/server.conf
 
 # OpenVPN 2.3 options
 #sudo printf "port 1194\nproto udp\ndev tun\nca /etc/openvpn/easy-rsa/pki/ca.crt\nkey /etc/openvpn/easy-rsa/pki/private/server.key\ncert /etc/openvpn/easy-rsa/pki/issued/server.crt\ndh /etc/openvpn/easy-rsa/pki/dh.pem\nserver 10.8.0.0 255.255.255.0\nifconfig-pool-persist ipp.txt\npush \"redirect-gateway def1 bypass-dhcp\"\npush \"dhcp-option DNS 10.8.0.1\"\npush \"dhcp-option DNS 208.67.222.222\"\npush \"dhcp-option DNS 208.67.220.220\"\nduplicate-cn\nkeepalive 10 60\ntls-version-min 1.2 #Note: Disable if you support Chromebooks\ntls-cipher TLS-DHE-RSA-WITH-AES-256-GCM-SHA384:TLS-DHE-RSA-WITH-AES-256-CBC-SHA\ncipher AES-256-CBC\ntls-auth /etc/openvpn/easy-rsa/ta.key 0\ncomp-lzo\nuser nobody\ngroup nobody\npersist-key\npersist-tun\nstatus openvpn-status.log\nlog /var/log/openvpn.log\nverb 3\nauth SHA256\nserver-ipv6 2001:db8:0:123::/64\ntun-ipv6\npush tun-ipv6\nifconfig-ipv6 2001:db8:0:123::1 2001:db8:0:123::2\npush \"route-ipv6 2001:db8:0:abc::/64\"\npush \"route-ipv6 2000::/3\"\nproto udp6\n#plugin /usr/lib64/openvpn/plugin/lib/openvpn-auth-pam.so login" >> /etc/openvpn/server.conf
@@ -138,23 +152,19 @@ printf "* Setting up routing *\n"
 printf "**********************\n"
 printf "\n\n"
 
-# For Amazon Linux 2:
-sudo yum -y install iptables-services
-
-sudo iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
-sudo service iptables save
-sudo service iptables restart
+firewall-cmd --zone=public --add-service openvpn --permanent
+firewall-cmd --add-masquerade --permanent
+firewall-cmd --reload
 
 # Enable IP forwarding
 
 if [[ $systemd = "true" ]];
 then
-  sudo echo "net.ipv4.ip_forward = 1" >> /tmp/11-sysctl.conf
-  sudo mv /tmp/11-sysctl.conf /etc/sysctl.d/11-sysctl.conf
-  sudo sysctl --system
+  echo net.ipv4.ip_forward=1 |sudo tee -a /etc/sysctl.conf
+  sysctl --system
 else
-  sudo sed -i "s/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/g" /etc/sysctl.conf
-  sudo sysctl -p
+  sed -i "s/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/g" /etc/sysctl.conf
+  sysctl -p
 fi
 
 printf "********************\n"
@@ -162,7 +172,7 @@ printf "* Starting OpenVPN *\n"
 printf "********************\n"
 printf "\n\n"
 
-sudo service openvpn start
+systemctl start openvpn-server@server 
 printf "******************************\n"
 printf "* Installing Apache HTTP 2.4 *\n"
 printf "******************************\n"
@@ -173,14 +183,14 @@ printf "\n\n"
 if `yum search httpd24 |grep -q matched`
 then
     echo "We have a 2.4 package, install 2.4."
-    sudo yum -y install httpd24
-    sudo chkconfig httpd on
-    sudo yum -y install mod24_ssl
+    yum -y install httpd24
+    chkconfig httpd on
+    yum -y install mod24_ssl
 else
     echo "We do not see a 2.4 package, httpd is likely latest"
-    sudo yum -y install httpd
-    sudo chkconfig httpd on
-    sudo yum -y install mod_ssl
+    yum -y install httpd
+    chkconfig httpd on
+    yum -y install mod_ssl
 fi
 
 #For Amazon Lightsail Linux AMI
@@ -190,7 +200,7 @@ printf "* Installing Self-Signed Cert *\n"
 printf "*******************************\n"
 printf "\n\n"
 
-sudo openssl req -new -newkey rsa:4096 -sha256 -days 365 -nodes -x509 -keyout /etc/pki/tls/private/localhost.key -out /etc/pki/tls/certs/localhost.crt -subj "/CN=$myip/"
+openssl req -new -newkey rsa:4096 -sha256 -days 365 -nodes -x509 -keyout /etc/pki/tls/private/localhost.key -out /etc/pki/tls/certs/localhost.crt -subj "/CN=$myip/"
 
 printf "****************************************************************\n"
 printf "* Updating Apache config. Adding server name and virtual host. *\n"
@@ -200,9 +210,9 @@ printf "* mimetype logic for mobile device downloads.                  *\n"
 printf "****************************************************************\n"
 printf "\n\n"
 
-sudo sed -i "s/#ServerName www.example.com:80/ServerName $myip/g" /etc/httpd/conf/httpd.conf
+sed -i "s/#ServerName www.example.com:80/ServerName $myip/g" /etc/httpd/conf/httpd.conf
 
-sudo printf "\n<VirtualHost *:80>\nServerName $myip\nRedirect / https://$myip/\n</VirtualHost>\n<VirtualHost *:443>\nServerName $myip\nSSLCertificateFile /etc/pki/tls/certs/localhost.crt\nSSLCertificateKeyFile /etc/pki/tls/private/localhost.key\n</VirtualHost>\n\nServerSignature Off\nServerTokens Prod\nHeader set X-Robots-Tag \"noindex\"\n\n<IfModule headers_module>\n<FilesMatch \".(ovpn|onc)$\">\nHeader Set Content-type application/x-openvpn-profile\n</FilesMatch>\n</IfModule>" >> /etc/httpd/conf/httpd.conf
+printf "\n<VirtualHost *:80>\nServerName $myip\nRedirect / https://$myip/\n</VirtualHost>\n<VirtualHost *:443>\nServerName $myip\nSSLCertificateFile /etc/pki/tls/certs/localhost.crt\nSSLCertificateKeyFile /etc/pki/tls/private/localhost.key\n</VirtualHost>\n\nServerSignature Off\nServerTokens Prod\nHeader set X-Robots-Tag \"noindex\"\n\n<IfModule headers_module>\n<FilesMatch \".(ovpn|onc)$\">\nHeader Set Content-type application/x-openvpn-profile\n</FilesMatch>\n</IfModule>" >> /etc/httpd/conf/httpd.conf
 
 printf "******************************************************************\n"
 printf "* Generating client config download directory at host/downloads. *\n"
@@ -210,19 +220,19 @@ printf "* Creating password & copying to .web in ec2-user home.          *\n"
 printf "******************************************************************\n"
 printf "\n\n"
 
-sudo mkdir /var/www/html/downloads && sudo chown apache:apache /var/www/html/downloads
+mkdir /var/www/html/downloads && chown apache:apache /var/www/html/downloads
 
 # Generate a password for the client config directory, place it in ~/ so that user can find it on login.
 # Username is vpn.
 
 rand_pw=`< /dev/urandom tr -dc '_A-Z-a-z-0-9@><^&*()[]+?' | head -c9`; echo $rand_pw >> /home/$logname/.web; htdigest_hash=`printf vpn:vpnweb:$rand_pw | md5sum -`; echo "vpn:vpnweb:${htdigest_hash:0:32}" >> /tmp/.tmp
 
-sudo mv /tmp/.tmp /etc/httpd/.digestauth
-sudo chown apache:apache /etc/httpd/.digestauth
+mv /tmp/.tmp /etc/httpd/.digestauth
+chown apache:apache /etc/httpd/.digestauth
+# For SELinux
+chown $logname:$logname /home/$logname/.web
 
-sudo chown $logname:$logname /home/$logname/.web
-
-sudo printf "\n<Directory \"/var/www/html/downloads\">\nAuthType Digest\nAuthName \"vpnweb\"\nAuthUserFile /etc/httpd/.digestauth\nRequire valid-user\n</Directory>" >> /etc/httpd/conf/httpd.conf
+printf "\n<Directory \"/var/www/html/downloads\">\nAuthType Digest\nAuthName \"vpnweb\"\nAuthUserFile /etc/httpd/.digestauth\nRequire valid-user\n</Directory>" >> /etc/httpd/conf/httpd.conf
 
 
 printf "*******************\n"
@@ -230,7 +240,7 @@ printf "* Starting Apache *\n"
 printf "*******************\n"
 printf "\n\n"
 
-sudo service httpd start
+service httpd start
 
 printf "********************************************\n"
 printf "* Building client configs and placing them *\n"
@@ -238,13 +248,13 @@ printf "* at https://$myip/downloads.       *\n"
 printf "********************************************\n"
 printf "\n\n"
 
-cd /tmp && git clone https://github.com/jenh/sevenminutevpn.git
-cd /tmp/sevenminutevpn/mkcliconf && sudo python mkcliconf.py
+#cd /tmp && git clone https://github.com/jenh/sevenminutevpn.git
+cd $STARTDIR/mkcliconf && python3 mkcliconf.py
 
 # Move configs to download directory
-sudo mv /tmp/sevenminutevpn/mkcliconf/$myip.* /var/www/html/downloads/
-sudo chown apache:apache /var/www/html/downloads/
-
+mv $STARTDIR/mkcliconf/$myip.* /var/www/html/downloads/
+chown apache:apache /var/www/html/downloads/
+restorecon -Rv /var/www/html
 
 printf "***************************************\n"
 printf "* Installing DNSMasq and configuring  *\n"
@@ -253,10 +263,10 @@ printf "***************************************\n"
 printf "\n\n"
 
 cd /tmp && wget https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
-sudo mv -f /tmp/hosts /etc/hosts
-sudo yum -y install dnsmasq
-sudo service dnsmasq start
-sudo chkconfig dnsmasq on
+mv -f /tmp/hosts /etc/hosts
+yum -y install dnsmasq
+service dnsmasq start
+chkconfig dnsmasq on
 
 printf "*****************************************************************\n"
 printf "* ALL DONE! Open up ports 443/TCP and 1194/UDP. Navigate to     *\n"

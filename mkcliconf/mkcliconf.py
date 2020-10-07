@@ -13,7 +13,10 @@ args = parser.parse_args()
 if (args.config):
     conf_file = args.config
 else:
-    conf_file = "/etc/openvpn/server.conf"
+    if os.path.isfile('/etc/openvpn/server.conf'):
+        conf_file = '/etc/openvpn/server.conf'
+    elif os.path.isfile('/etc/openvpn/server/server.conf'):
+        conf_file = '/etc/openvpn/server/server.conf' 
 
 if (args.keystore):
     keystore = args.keystore.rstrip('\\')
@@ -21,11 +24,11 @@ else:
     keystore = "/etc/openvpn/easy-rsa/pki"
 
 # Get the CA name from OpenVPN's cert
-CN = subprocess.Popen('openssl x509 -noout -subject -in ' + keystore + "/ca.crt", shell=True, stdout=subprocess.PIPE)
+CN = subprocess.Popen('openssl x509 -noout -subject -in ' + keystore + "/ca.crt", shell=True, stdout=subprocess.PIPE,encoding='utf-8')
 for line in CN.stdout:
     server_name = line.strip().split("=")[2].lstrip()
 
-print "\nUsing " + conf_file + " as server.conf and" + keystore + " as keystore folder.\n"
+print("\nUsing " + conf_file + " as server.conf and" + keystore + " as keystore folder.\n")
 #print "Will output: \n\t - ovpn file for importing into Linux/Windows/Mac/iPhone/Android.\n\t - p12 with password chrome for importing into ChromeOS \n\t - A valid onc file for Chrome.\n"
 
 # Wake up output file
@@ -92,7 +95,7 @@ ovpn_out.write("persist-tun\n")
 ovpn_out.write("verb 3\n")
 
 # Build a p12 for Chrome
-subprocess.Popen('openssl pkcs12 -export -out ' + server_name + '.p12 -inkey ' + keystore + '/private/client.key -in ' + keystore +'/issued/client.crt -certfile ' + keystore + '/ca.crt -passout pass:chrome', shell=True, stdout=subprocess.PIPE)
+subprocess.Popen('openssl pkcs12 -export -out ' + server_name + '.p12 -inkey ' + keystore + '/private/client.key -in ' + keystore +'/issued/client.crt -certfile ' + keystore + '/ca.crt -passout pass:chrome', shell=True, stdout=subprocess.PIPE,encoding='utf-8')
 
 ovpn_out.write("remote " + server_name + "\n")
 
@@ -162,7 +165,7 @@ try:
         outf.write(onc)
 
 except IOError:
-    print "\nWARNING! Missing ChromeTemplate.onc. Not creating ONC file.\n"
+    print("\nWARNING! Missing ChromeTemplate.onc. Not creating ONC file.\n")
     pass
 
 #print onc
@@ -170,7 +173,7 @@ except IOError:
 
 ovpn_out.close()
 
-generated = subprocess.Popen('ls |grep ' + server_name ,shell=True, stdout=subprocess.PIPE)
-print "Generated:\n"
+generated = subprocess.Popen('ls |grep ' + server_name ,shell=True, stdout=subprocess.PIPE,encoding='utf-8')
+print("Generated:\n")
 for line in generated.stdout:
-    print "\t-" + line
+    print("\t-" + line)
