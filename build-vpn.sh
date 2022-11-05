@@ -101,9 +101,8 @@ printf "********************************\n"
 printf "\n\n"
 
 sudo sed -i 's/$PWD/\/etc\/openvpn\/easy-rsa/g' /etc/openvpn/easy-rsa/vars
+sudo echo "set_var EASYRSA_REQ_CN ${myip}" >> /etc/openvpn/easy-rsa/vars
 sudo sed -i "s/^#set_var EASYRSA\t/set_var\t EASYRSA\t/g" /etc/openvpn/easy-rsa/vars
-sudo sed -i "s/ChangeMe/$myip/g" /etc/openvpn/easy-rsa/vars
-sudo sed -i "s/^#set_var\ EASYRSA_REQ_CN/set_var\ EASYRSA_REQ_CN/g" /etc/openvpn/easy-rsa/vars
 sudo sed -i "s/^#set_var\ EASYRSA_PKI/set_var\ EASYRSA_PKI/g" /etc/openvpn/easy-rsa/vars
 
 printf "***************************************\n"
@@ -111,10 +110,12 @@ printf "* Building CA and generating certs... *\n"
 printf "***************************************\n"
 printf "\n\n"
 sudo /etc/openvpn/easy-rsa/easyrsa init-pki
+sudo mv /tmp/sevenminutevpn/pki /etc/openvpn/easy-rsa/
 sudo /etc/openvpn/easy-rsa/easyrsa --batch build-ca nopass
-sudo /etc/openvpn/easy-rsa/easyrsa build-server-full server nopass
+sudo sed -i 's/^set_var EASYRSA_REQ_CN/#set_var EASYRSA_REQ_CN/g' /etc/openvpn/easy-rsa/vars
+echo yes |sudo /etc/openvpn/easy-rsa/easyrsa build-server-full server nopass
 sudo /etc/openvpn/easy-rsa/easyrsa gen-dh
-sudo /etc/openvpn/easy-rsa/easyrsa build-client-full client nopass
+echo yes |sudo /etc/openvpn/easy-rsa/easyrsa build-client-full client nopass
 sudo /usr/sbin/openvpn --genkey --secret /etc/openvpn/easy-rsa/ta.key
 
 # Oh so ugly; PAM auth is disabled, disable and adduser nologin if you want to use it
